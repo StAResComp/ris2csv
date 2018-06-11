@@ -162,13 +162,19 @@ function ris2csv($ris, $csv, &$message) { //{{{
         $tag = '';
         
         while (false !== ($line = fgets($ris))) {
+            // try to split line on delimiter
             $tagValue = explode($delim, $line, 2);
+            $multiline = false;
+            
+            // have tag and value
             if (2 == count($tagValue)) {
                 $tag = $tagValue[0];
                 $value = trim($tagValue[1]);
             }
+            // just continuation of value
             else {
-                $value .= trim($line);
+                $value = "\n" . trim($line);
+                $multiline = true;
             }
             
             // at end of record
@@ -189,8 +195,16 @@ function ris2csv($ris, $csv, &$message) { //{{{
                 continue;
             }
             
-            // add this value to array for tag in record
-            $record[$tag][] = $value;
+            // multiline value, so append to last item in array for this tag
+            if ($multiline) {
+                end($record[$tag]);
+                $record[$tag][key($record[$tag])] .= $value;
+                reset($record[$tag]);
+            }
+            // single line, so just add value as new item for tag array
+            else {
+                $record[$tag][] = $value;
+            }
         }
         
         $success = true;
