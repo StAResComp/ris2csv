@@ -146,6 +146,7 @@ function ris2csv($ris, $csv, &$message) { //{{{
     global $map;
     
     $success = false;
+    $delim = '  - '; // RIS format delimiter
     
     do {
         // CSV header
@@ -157,9 +158,18 @@ function ris2csv($ris, $csv, &$message) { //{{{
         $record = initialiseRecord();
         
         // loop over lines in RIS
+        $value = '';
+        $tag = '';
+        
         while (false !== ($line = fgets($ris))) {
-            list ($tag, $value) = explode('  - ', $line, 2);
-            $value = trim($value);
+            $tagValue = explode($delim, $line, 2);
+            if (2 == count($tagValue)) {
+                $tag = $tagValue[0];
+                $value = trim($tagValue[1]);
+            }
+            else {
+                $value .= trim($line);
+            }
             
             // at end of record
             if ('ER' == $tag) {

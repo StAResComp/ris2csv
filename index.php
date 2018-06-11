@@ -47,11 +47,14 @@ do {
             break;
         }
         
+        // filename for CSV
+        $filename = str_replace(' ', '_', $_FILES[$field]['name']);
+        $filename = preg_replace('/^(.*)\.ris$/', '${1}.csv', $filename);
+        
         // headers for downloading CSV
         header('Content-type: text/csv');
         header(sprintf('Content-disposition: attachment; filename=%s',
-                       preg_replace('/^(.*)\.ris$/', '${1}.csv', 
-                                    $_FILES[$field]['name'])));
+                       $filename));
         
         // output CSV
         fseek($csv, 0);
